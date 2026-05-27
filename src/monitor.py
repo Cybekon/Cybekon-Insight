@@ -1,21 +1,25 @@
 import time
 import os
 
+
 def tail_file(filename):
-    """It goes to end of the document and waiting to new lines"""
+    # If there is no file, stay on standby at the system's helm instead of shutting down
+    if not os.path.exists(filename):
+        print(f"[*] [MONITOR] Waiting for log file to be created: {filename}")
+        while not os.path.exists(filename):
+            time.sleep(1)
+
     try:
-        with open(filename, 'r') as f:
-            # go to end of the file
+        # We prevented it from crashing due to strange characters by adding encoding and error handling
+        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
             f.seek(0, os.SEEK_END)
 
             while True:
                 line = f.readline()
                 if not line:
-                    time.sleep(0.1) # do not tired to processor
+                    time.sleep(0.1)  # do not tire the processor
                     continue
-                yield line
+                yield line.strip()  # Send after removing invisible spaces at the end of the line
 
-    except FileNotFoundError:
-        print(f"Error: {filename} not found")
     except PermissionError:
-        print(f"Error: {filename} permission denied")
+        print(f"[-] [ERROR] Permission denied for file: {filename}. Run as admin/root.")
