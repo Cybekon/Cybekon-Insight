@@ -1,31 +1,44 @@
 import re
 
+
 class DetectionEngine:
     def __init__(self):
         self.rules = {
-            "ssh_failed_password": r"Failed password for .* from (?P<ip>\d+\.\d+\.\d+\.\d+)",
-            "invalid_user": r"Invalid user .* from (?P<ip>\d+\.\d+\.\d+\.\d+)",
-            "sql_injection_attempt": r"(UNION SELECT|OR '1'='1'|SELECT.*FROM)"
+            # Linux Authentication: SSH failed password attempts
+            "ssh_failed_password": r"Failed password for (?:invalid user )?\S+ from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})",
+
+            # Linux Authentication: Login attempts with a non-existent username
+            "invalid_user": r"Invalid user \S+ from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})",
+
+            # Web Server (Nginx/Apache) Logs: SQL Injection Detection and IP Capture
+            # In Nginx logs, the IP address is usually at the very beginning of the line (^).
+            # We capture the IP address at the beginning of the line and search for the term “SQLi” in the rest of the line.
+            "sql_injection_attempt": r"^(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*?(?:UNION\s+SELECT|OR\s+'1'='1'|SELECT.*FROM|UNION\s+ALL\s+SELECT)",
+
+            # Web Server Logs: Directory Traversal (Directory Traversal / Reading Sensitive Files)
+            "directory_traversal": r"^(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*?(?:\.\.\/|\.\.\\|/etc/passwd|/etc/shadow)"
         }
 
-
-    def analyze(self,line):
-        """It compares the log line against the rules."""
+    def analyze(self, line):
+        """It compares the log line against the rules and extracts threat data."""
         if not line:
             return None
 
-        for rule_name,pattern in self.rules.items():
+        for rule_name, pattern in self.rules.items():
             try:
-                match = re.search(pattern,line)
+                # To remove case sensitivity in SQLi searches (re.IGNORECASE)
+                # we run the rules using re.IGNORECASE (e.g., “union select” and “UNION SELECT” are treated as the same)
+                match = re.search(pattern, line, re.IGNORECASE)
                 if match:
-                    ip_address = "Unknown"
-                    if "ip" in match.groupdict():
-                        ip_address = match.group("ip")
+                    group_dict = match.groupdict()
+                    ip_address = group_dict.get("ip", "Unknown")
+
                     return {
                         "rule": rule_name,
                         "ip": ip_address,
                         "message": line.strip()
                     }
             except re.error as e:
-                print(f"Regex Error ({rule_name}): {e}")
+                print(f"[-] [REGEX ERROR] ({rule_name}): {e}")
+
         return None
