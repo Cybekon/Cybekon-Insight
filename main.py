@@ -12,7 +12,7 @@ load_dotenv()
 def main():
     # Fetch configurations
     log_path = os.getenv("LOG_FILE_PATH")
-    threshold = int(os.getenv("THRESHOLD"))
+    threshold = int(os.getenv("THRESHOLD", 5))
 
     print(f"--- 🛡️ Log-Based Detection & Security Monitor Started ---")
     print(f"--- 📂 Monitoring File: {log_path} ---")
@@ -35,13 +35,18 @@ def main():
 
             if result:
                 ip = result['ip']
+
+                if ip == "Unknown":
+                    print(f"⚠️  [DETECTOR] Threat detected but Attacker IP could not be parsed. Line: {line}")
+                    continue
+
                 # Step 2: Save the event to the database (History/Logs)
                 db.save_alert(result)
 
                 # Step 3: Check how many times this IP has attacked in the last 5 minutes
-                attack_count = db.get_ip_count(result['ip'], minutes=5)
+                attack_count = db.get_ip_count(ip, minutes=5)
 
-                print(f"🔍 [LOG] IP: {result['ip']} | Attempt: {attack_count}/{threshold}")
+                print(f"🔍 [LOG] IP: {ip} | Attempt: {attack_count}/{threshold}")
 
                 # Step 4: Decision Making (Logic)
                 if attack_count >= threshold:
@@ -55,7 +60,8 @@ def main():
 
                         if block_status:
                             already_blocked_ips.add(ip)
-                            print(f"🚫 [FIREWALL] IP {ip} has been permanently blocked.")
+                        else:
+                            print(f"⚠️  [FIREWALL ERROR] Failed to apply block rule for IP: {ip}")
 
                         # Step 6: Send Notification
                         notif_status = notifier.send_alert(result)
@@ -63,11 +69,11 @@ def main():
                         if notif_status:
                             print(f"📱 ALERT: Critical threat notification sent for IP: {ip}")
                         else:
-                            print(f"⚠️ ERROR: Failed to send Telegram notification.")
+                            print(f"⚠️  ERROR: Failed to send Telegram notification.")
                     else:
                         print(f"ℹ️  [INFO] IP {ip} is already blocked. Skipping action.")
 
-                    # Optional: Initial warning
+                # Optional: Initial warning
                 elif attack_count == 1:
                     print(f"⚠️  WARNING: Initial threat detected from {ip}")
 
