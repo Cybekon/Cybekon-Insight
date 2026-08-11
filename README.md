@@ -1,5 +1,5 @@
-# Log-Based-Detection-and-Security-Monitor
-**This tool** is a modular, high performance Intrusion Detection and Prevention System (IDS/IPS) designed for Linux servers. It monitors system logs in real time, identifies malicious patterns, logs threats to a database, and takes active defense measures by blocking attackers via system firewalls.
+# Log Based Detection and Security Monitor
+**Cybekon Insight** is a modular, high performance Intrusion Detection and Prevention System (IDS/IPS) designed for Linux servers. It monitors system logs in real time, identifies malicious patterns, logs threats to a database, and takes active defense measures by blocking attackers via system firewalls.
 
 ## 🚀 Key Features
 
