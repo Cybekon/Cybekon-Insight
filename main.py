@@ -14,7 +14,7 @@ def main():
     log_path = os.getenv("LOG_FILE_PATH")
     threshold = int(os.getenv("THRESHOLD", 5))
 
-    print(f"--- 🛡️ Log-Based Detection & Security Monitor Started ---")
+    print(f"--- 🛡️ Cybekon Insight Started ---")
     print(f"--- 📂 Monitoring File: {log_path} ---")
     print(f"--- ⚙️ Security Threshold: {threshold} attempts ---")
 
