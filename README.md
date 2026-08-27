@@ -29,8 +29,8 @@ The project is built on the **Separation of Concerns** principle:
 ### 2. Clone and Prepare
 ```bash
 # Clone the repository
-git clone https://github.com/HellReys/Log-Based-Detection-and-Security-Monitor.git
-cd Log-Based-Detection-and-Security-Monitor
+git clone https://github.com/Cybekon/Cybekon-Insight.git
+cd Cybekon-Insight
 
 # Setup virtual environment
 python3 -m venv .venv
