@@ -5,6 +5,7 @@ from src.detector import DetectionEngine
 from src.notifier import TelegramNotifier
 from src.database import SecurityDB
 from src.blocker import FirewallBlocker
+from src.config import load_config
 
 load_dotenv()
 
