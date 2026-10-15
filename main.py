@@ -11,13 +11,18 @@ load_dotenv()
 
 
 def main():
-    # Fetch configurations
-    log_path = os.getenv("LOG_FILE_PATH")
-    threshold = int(os.getenv("THRESHOLD", 5))
+    try:
+        config = load_config()
+    except ValueError as e:
+        print(f"[CONFIG ERROR] {e}")
+        return
 
-    print(f"--- 🛡️ Cybekon Insight Started ---")
-    print(f"--- 📂 Monitoring File: {log_path} ---")
-    print(f"--- ⚙️ Security Threshold: {threshold} attempts ---")
+    log_path = config["log_path"]
+    threshold = config["threshold"]
+
+    print("--- Cybekon Insight Started ---")
+    print(f"Monitoring File: {log_path}")
+    print(f"Security Threshold: {threshold} attempts")
 
     # Initialize professional modules
     db = SecurityDB()
